@@ -1,7 +1,6 @@
 package com.assignment
 
 import com.assignment.models.Country
-import com.assignment.models.Product
 import com.assignment.models.ProductCreationRequest
 import com.assignment.repository.ProductRepository
 import kotlinx.coroutines.async
@@ -21,7 +20,7 @@ class ProductConcurrencyTest {
     private lateinit var service: ProductService
 
     @BeforeTest
-    fun setup() =
+    fun setup() {
         runBlocking {
             database =
                 Database.connect(
@@ -30,7 +29,9 @@ class ProductConcurrencyTest {
                     user = "root",
                     password = "",
                 )
+
             initializeProductTables(database)
+
             repository = ProductRepository(database)
             service = ProductService(repository)
 
@@ -40,8 +41,10 @@ class ProductConcurrencyTest {
                     basePrice = 100.0,
                     country = Country.SWEDEN,
                 )
+
             service.createProduct(product)
         }
+    }
 
     @AfterTest
     fun tearDown() {

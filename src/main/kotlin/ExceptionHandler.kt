@@ -3,10 +3,12 @@ package com.assignment
 import com.assignment.exceptions.ApplyDiscountRequestInvalidException
 import com.assignment.exceptions.InvalidCountryInRequestException
 import com.assignment.exceptions.ProductToBeDiscountedNotFoundException
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.plugins.statuspages.*
-import io.ktor.server.response.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.application.log
+import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.response.respond
 
 fun Application.configureExceptionHandler() {
     install(StatusPages) {

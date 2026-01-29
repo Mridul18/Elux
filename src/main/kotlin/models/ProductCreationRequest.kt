@@ -1,7 +1,7 @@
 package com.assignment.models
 
 import kotlinx.serialization.Serializable
-import java.util.*
+import java.util.UUID
 
 @Serializable
 data class Product(
@@ -22,7 +22,7 @@ data class ProductCreationRequest(
     val name: String,
     val basePrice: Double,
     val country: Country,
-){
+) {
     fun toProduct(): Product {
         return Product(
             id = UUID.randomUUID().toString(),
