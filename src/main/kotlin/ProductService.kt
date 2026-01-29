@@ -1,7 +1,9 @@
 package com.assignment
 
+import com.assignment.exceptions.ProductToBeDiscountedNotFoundException
 import com.assignment.models.Country
 import com.assignment.models.Product
+import com.assignment.models.ProductCreationRequest
 import com.assignment.models.ProductResponse
 import com.assignment.repository.ProductRepository
 
@@ -24,8 +26,9 @@ class ProductService(private val productRepository: ProductRepository) {
         }
     }
 
-    suspend fun createProduct(product: Product) {
-        productRepository.save(product)
+    suspend fun createProduct(productCreationRequest: ProductCreationRequest): Product {
+        val product = productCreationRequest.toProduct()
+        return productRepository.save(product)
     }
 
     suspend fun applyDiscount(
@@ -33,14 +36,8 @@ class ProductService(private val productRepository: ProductRepository) {
         discountId: String,
         percent: Double,
     ): Boolean {
-        if (percent <= 0 || percent >= 100) {
-            throw IllegalArgumentException("Discount percent must be between 0 and 100 (exclusive)")
-        }
-
-        val product = productRepository.findById(productId)
-        if (product == null) {
-            throw IllegalArgumentException("Product with id $productId not found")
-        }
+        productRepository.findById(productId)
+            ?: throw ProductToBeDiscountedNotFoundException(productId)
 
         return productRepository.applyDiscount(productId, discountId, percent)
     }

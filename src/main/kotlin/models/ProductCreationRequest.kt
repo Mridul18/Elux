@@ -1,6 +1,7 @@
 package com.assignment.models
 
 import kotlinx.serialization.Serializable
+import java.util.*
 
 @Serializable
 data class Product(
@@ -17,10 +18,21 @@ data class Product(
 }
 
 @Serializable
-data class Discount(
-    val discountId: String,
-    val percent: Double,
-)
+data class ProductCreationRequest(
+    val name: String,
+    val basePrice: Double,
+    val country: Country,
+){
+    fun toProduct(): Product {
+        return Product(
+            id = UUID.randomUUID().toString(),
+            name = name,
+            basePrice = basePrice,
+            country = country,
+            discounts = emptyList()
+        )
+    }
+}
 
 @Serializable
 data class ProductResponse(
@@ -32,8 +44,3 @@ data class ProductResponse(
     val finalPrice: Double,
 )
 
-@Serializable
-data class ApplyDiscountRequest(
-    val discountId: String,
-    val percent: Double,
-)

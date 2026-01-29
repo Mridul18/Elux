@@ -5,79 +5,45 @@ import com.assignment.database.Products
 import com.assignment.models.Country
 import com.assignment.models.Discount
 import com.assignment.models.Product
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import org.jetbrains.exposed.exceptions.ExposedSQLException
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.ResultRow
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import java.math.BigDecimal
 
 class ProductRepository(private val database: Database) {
     suspend fun findByCountry(country: Country): List<Product> =
-        withContext(Dispatchers.IO) {
-            newSuspendedTransaction(db = database) {
-                Products
-                    .selectAll().where { Products.country.eq(country.name) }
-                    .map { row -> row.toProduct() }
-            }
+        newSuspendedTransaction(db = database) {
+            Products.selectAll().where { Products.country.eq(country.name) }
+                .map { row -> row.toProduct() }
         }
 
-    suspend fun findById(productId: String): Product? =
-        withContext(Dispatchers.IO) {
-            newSuspendedTransaction(db = database) {
-                Products
-                    .selectAll().where { Products.id.eq(productId) }
-                    .singleOrNull()
-                    ?.toProduct()
-            }
-        }
+    suspend fun findById(productId: String): Product? = newSuspendedTransaction(db = database) {
+        Products
+            .selectAll().where { Products.id.eq(productId) }
+            .singleOrNull()
+            ?.toProduct()
+    }
 
-    suspend fun save(product: Product): Unit =
-        withContext(Dispatchers.IO) {
-            newSuspendedTransaction(db = database) {
-                Products.insert {
-                    it[id] = product.id
-                    it[name] = product.name
-                    it[basePrice] = BigDecimal.valueOf(product.basePrice)
-                    it[country] = product.country.name
-                }
+    suspend fun save(product: Product): Product =
+        newSuspendedTransaction(db = database) {
+            Products.insert {
+                it[id] = product.id
+                it[name] = product.name
+                it[basePrice] = BigDecimal.valueOf(product.basePrice)
+                it[country] = product.country.name
             }
+            product
         }
 
     suspend fun applyDiscount(
         productId: String,
         discountId: String,
         percent: Double,
-    ): Boolean =
-        withContext(Dispatchers.IO) {
-            newSuspendedTransaction(db = database) {
-                try {
-                    ProductDiscounts.insert {
-                        it[ProductDiscounts.productId] = productId
-                        it[ProductDiscounts.discountId] = discountId
-                        it[ProductDiscounts.percent] = BigDecimal.valueOf(percent)
-                    }
-                    true
-                } catch (e: ExposedSQLException) {
-                    if (isUniqueConstraintViolation(e)) {
-                        false
-                    } else {
-                        throw e
-                    }
-                }
-            }
-        }
-
-    private fun isUniqueConstraintViolation(e: ExposedSQLException): Boolean {
-        val sqlState = e.sqlState
-        val message = e.message?.uppercase() ?: ""
-        return sqlState == "23505" ||
-            message.contains("PRIMARY KEY") ||
-            message.contains("UNIQUE CONSTRAINT") ||
-            message.contains("UNIQUE VIOLATION")
+    ): Boolean = newSuspendedTransaction(db = database) {
+        ProductDiscounts.insertIgnore {
+            it[ProductDiscounts.productId] = productId
+            it[ProductDiscounts.discountId] = discountId
+            it[ProductDiscounts.percent] = BigDecimal.valueOf(percent)
+        }.insertedCount > 0
     }
 
     private fun ResultRow.toProduct(): Product {
@@ -92,7 +58,7 @@ class ProductRepository(private val database: Database) {
                     )
                 }
         val countryString = this[Products.country]
-        val country = Country.fromStringOrThrow(countryString)
+        val country = Country.fromString(countryString)
 
         return Product(
             id = productId,

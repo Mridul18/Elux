@@ -1,19 +1,33 @@
 package com.assignment
 
-import com.assignment.validator.ValidationException
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.Application
-import io.ktor.server.application.install
-import io.ktor.server.application.log
-import io.ktor.server.plugins.statuspages.StatusPages
-import io.ktor.server.response.respond
+import com.assignment.exceptions.ApplyDiscountRequestInvalidException
+import com.assignment.exceptions.InvalidCountryInRequestException
+import com.assignment.exceptions.ProductToBeDiscountedNotFoundException
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.response.*
 
-fun Application.configureExceptionHandling() {
+fun Application.configureExceptionHandler() {
     install(StatusPages) {
-        exception<ValidationException> { call, cause ->
+        exception<ProductToBeDiscountedNotFoundException>{ call, cause ->
+            call.respond(
+                HttpStatusCode.NotFound,
+                mapOf("error" to (cause.message ?: "Product not found"))
+            )
+        }
+
+        exception<ApplyDiscountRequestInvalidException> { call, cause ->
             call.respond(
                 HttpStatusCode.BadRequest,
-                mapOf("error" to (cause.message ?: "Validation failed")),
+                mapOf("error" to (cause.message ?: "Invalid apply discount request"))
+            )
+        }
+
+        exception<InvalidCountryInRequestException> { call, cause ->
+            call.respond(
+                HttpStatusCode.BadRequest,
+                mapOf("error" to (cause.message ?: "Invalid country in request"))
             )
         }
 

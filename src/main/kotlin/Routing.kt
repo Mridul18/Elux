@@ -2,22 +2,21 @@ package com.assignment
 
 import com.assignment.models.ApplyDiscountRequest
 import com.assignment.models.Product
+import com.assignment.models.ProductCreationRequest
 import com.assignment.validator.ProductValidator
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.Application
-import io.ktor.server.request.receive
-import io.ktor.server.response.respond
-import io.ktor.server.routing.get
-import io.ktor.server.routing.post
-import io.ktor.server.routing.put
-import io.ktor.server.routing.routing
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 
 fun Application.configureRouting(productService: ProductService) {
     routing {
         post("/products") {
-            val product = call.receive<Product>()
-            ProductValidator.validateProduct(product)
-            productService.createProduct(product)
+            val productCreationRequest = call.receive<ProductCreationRequest>()
+            ProductValidator.validateProductRequest(productCreationRequest)
+            val product: Product = productService.createProduct(productCreationRequest)
+
             call.respond(HttpStatusCode.Created, mapOf("id" to product.id))
         }
 
@@ -30,14 +29,14 @@ fun Application.configureRouting(productService: ProductService) {
 
         put("/products/{id}/discount") {
             val productId = ProductValidator.validateProductId(call.parameters["id"])
-            val request = call.receive<ApplyDiscountRequest>()
-            ProductValidator.validateDiscountRequest(request)
+            val applyDiscountRequest = call.receive<ApplyDiscountRequest>()
+            ProductValidator.validateDiscountRequest(applyDiscountRequest)
 
             val wasApplied =
                 productService.applyDiscount(
                     productId = productId,
-                    discountId = request.discountId,
-                    percent = request.percent,
+                    discountId = applyDiscountRequest.discountId,
+                    percent = applyDiscountRequest.percent,
                 )
 
             if (wasApplied) {

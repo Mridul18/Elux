@@ -7,7 +7,7 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module() {
-    configureExceptionHandling()
+    configureExceptionHandler()
     configureSerialization()
     configureDatabases()
 }

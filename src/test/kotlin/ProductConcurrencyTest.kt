@@ -2,6 +2,7 @@ package com.assignment
 
 import com.assignment.models.Country
 import com.assignment.models.Product
+import com.assignment.models.ProductCreationRequest
 import com.assignment.repository.ProductRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -34,8 +35,7 @@ class ProductConcurrencyTest {
             service = ProductService(repository)
 
             val product =
-                Product(
-                    id = "concurrent-test-product",
+                ProductCreationRequest(
                     name = "Concurrent Test Product",
                     basePrice = 100.0,
                     country = Country.SWEDEN,

@@ -10,15 +10,11 @@ enum class Country(val VAT: Double) {
     ;
 
     companion object {
-        fun fromStringOrThrow(countryString: String?): Country {
-            if (countryString.isNullOrBlank()) {
-                throw IllegalArgumentException("Country string cannot be null or blank")
-            }
+        fun fromString(countryString: String): Country {
             return try {
                 valueOf(countryString.uppercase())
-            } catch (e: IllegalArgumentException) {
-                val supportedCountries = entries.joinToString { it.name }
-                throw IllegalArgumentException("Invalid country: $countryString. Supported countries: $supportedCountries")
+            } catch (e: Exception) {
+                throw IllegalArgumentException("Invalid country: $countryString. Supported countries: ${getSupportedCountries()}")
             }
         }
 
