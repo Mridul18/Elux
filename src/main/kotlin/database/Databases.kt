@@ -1,5 +1,7 @@
-package com.assignment
+package com.assignment.database
 
+import com.assignment.service.ProductService
+import com.assignment.handler.configureRouting
 import com.assignment.repository.ProductRepository
 import io.ktor.server.application.Application
 import io.ktor.server.application.log

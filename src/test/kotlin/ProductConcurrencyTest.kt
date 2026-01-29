@@ -1,8 +1,10 @@
 package com.assignment
 
+import com.assignment.database.initializeProductTables
 import com.assignment.models.Country
 import com.assignment.models.ProductCreationRequest
 import com.assignment.repository.ProductRepository
+import com.assignment.service.ProductService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope

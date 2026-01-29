@@ -1,4 +1,4 @@
-package com.assignment
+package com.assignment.service
 
 import com.assignment.exceptions.ProductToBeDiscountedNotFoundException
 import com.assignment.models.Country

@@ -1,8 +1,9 @@
-package com.assignment
+package com.assignment.handler
 
 import com.assignment.models.ApplyDiscountRequest
 import com.assignment.models.Product
 import com.assignment.models.ProductCreationRequest
+import com.assignment.service.ProductService
 import com.assignment.validator.ProductValidator
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
