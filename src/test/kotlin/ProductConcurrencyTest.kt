@@ -8,6 +8,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.Database
+import org.junit.Assume.assumeTrue
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -18,16 +19,29 @@ class ProductConcurrencyTest {
     private lateinit var database: Database
     private lateinit var repository: ProductRepository
     private lateinit var service: ProductService
+    private lateinit var productId: String
 
     @BeforeTest
     fun setup() {
         runBlocking {
+            val url = System.getenv("POSTGRES_TEST_URL")
+            val user = System.getenv("POSTGRES_TEST_USER")
+            val password = System.getenv("POSTGRES_TEST_PASSWORD")
+
+            if (url.isNullOrBlank() || user.isNullOrBlank() || password.isNullOrBlank()) {
+                println(
+                    "Skipping ProductConcurrencyTest: POSTGRES_TEST_URL/POSTGRES_TEST_USER/POSTGRES_TEST_PASSWORD " +
+                        "not set. Start postgres via docker-compose and export these vars to run this test.",
+                )
+                assumeTrue(false)
+            }
+
             database =
                 Database.connect(
-                    url = "jdbc:h2:mem:test${System.currentTimeMillis()};DB_CLOSE_DELAY=-1",
-                    driver = "org.h2.Driver",
-                    user = "root",
-                    password = "",
+                    url = url,
+                    driver = "org.postgresql.Driver",
+                    user = user,
+                    password = password,
                 )
 
             initializeProductTables(database)
@@ -42,19 +56,18 @@ class ProductConcurrencyTest {
                     country = Country.SWEDEN,
                 )
 
-            service.createProduct(product)
+            productId = service.createProduct(product).id
         }
     }
 
     @AfterTest
     fun tearDown() {
-        // H2 in-memory database is automatically cleaned up
+        // postgres lifecycle handled externally (docker-compose)
     }
 
     @Test
     fun `test concurrent discount application - only one discount should be persisted`() =
         runBlocking {
-            val productId = "concurrent-test-product"
             val discountId = "concurrent-discount-1"
             val numberOfConcurrentRequests = 50
 

@@ -1,7 +1,6 @@
 val kotlin_version: String by project
 val logback_version: String by project
 val postgres_version: String by project
-val h2_version: String by project
 
 plugins {
     kotlin("jvm") version "2.2.21"
@@ -39,7 +38,6 @@ dependencies {
     testImplementation("io.ktor:ktor-client-content-negotiation")
     testImplementation("io.ktor:ktor-serialization-kotlinx-json")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
-    testImplementation("com.h2database:h2:$h2_version")
 }
 
 ktlint {
