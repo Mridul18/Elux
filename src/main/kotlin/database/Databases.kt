@@ -1,8 +1,8 @@
 package com.assignment.database
 
-import com.assignment.service.ProductService
 import com.assignment.handler.configureRouting
 import com.assignment.repository.ProductRepository
+import com.assignment.service.ProductService
 import io.ktor.server.application.Application
 import io.ktor.server.application.log
 import org.jetbrains.exposed.sql.Database

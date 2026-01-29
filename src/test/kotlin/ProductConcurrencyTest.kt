@@ -68,7 +68,7 @@ class ProductConcurrencyTest {
     }
 
     @Test
-    fun `test concurrent discount application - only one discount should be persisted`() =
+    fun `test concurrent discount application - only one discount should be persisted remaining should be dropped`() =
         runBlocking {
             val discountId = "concurrent-discount-1"
             val numberOfConcurrentRequests = 50
@@ -77,29 +77,41 @@ class ProductConcurrencyTest {
                 coroutineScope {
                     (1..numberOfConcurrentRequests).map {
                         async {
-                            try {
-                                service.applyDiscount(productId, discountId, 10.0)
-                                true
-                            } catch (e: Exception) {
-                                false
-                            }
+                            service.applyDiscount(
+                                productId = productId,
+                                discountId = discountId,
+                                percent = 10.0,
+                            )
                         }
                     }.awaitAll()
                 }
 
-            val successfulRequests = results.count { it }
-            assertTrue(successfulRequests > 0, "At least one request should succeed")
+            val appliedCount = results.count { it }
+            val ignoredCount = results.count { !it }
+
+            // Exactly one request should apply the discount
+            assertEquals(
+                1,
+                appliedCount,
+                "Exactly one request should apply the discount",
+            )
+
+            assertEquals(
+                numberOfConcurrentRequests - 1,
+                ignoredCount,
+                "All other requests should be idempotent no-ops",
+            )
+
+            val product = repository.findById(productId)
+            assertTrue(product != null)
 
             val discountCount =
-                runBlocking {
-                    val product = repository.findById(productId)
-                    product?.discounts?.count { it.discountId == discountId } ?: 0
-                }
+                product.discounts.count { it.discountId == discountId }
 
             assertEquals(
                 1,
                 discountCount,
-                "Only one discount should be persisted despite $numberOfConcurrentRequests concurrent requests",
+                "Database must contain exactly one discount row",
             )
         }
 }
