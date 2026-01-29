@@ -12,9 +12,13 @@ data class Product(
     val discounts: List<Discount> = emptyList(),
 ) {
     fun calculateFinalPrice(vat: Double): Double {
-        val totalDiscount = discounts.sumOf { it.percent } / 100.0
-        return basePrice * (1 - totalDiscount) * (1 + vat / 100.0)
+        val discountedPrice =
+            discounts.fold(basePrice) { price, discount ->
+                price * (1 - discount.percent / 100.0)
+            }
+        return discountedPrice * (1 + vat / 100.0)
     }
+
 }
 
 @Serializable
