@@ -12,24 +12,24 @@ import io.ktor.server.response.respond
 
 fun Application.configureExceptionHandler() {
     install(StatusPages) {
-        exception<ProductToBeDiscountedNotFoundException>{ call, cause ->
+        exception<ProductToBeDiscountedNotFoundException> { call, cause ->
             call.respond(
                 HttpStatusCode.NotFound,
-                mapOf("error" to (cause.message ?: "Product not found"))
+                mapOf("error" to (cause.message ?: "Product not found")),
             )
         }
 
         exception<ApplyDiscountRequestInvalidException> { call, cause ->
             call.respond(
                 HttpStatusCode.BadRequest,
-                mapOf("error" to (cause.message ?: "Invalid apply discount request"))
+                mapOf("error" to (cause.message ?: "Invalid apply discount request")),
             )
         }
 
         exception<InvalidCountryInRequestException> { call, cause ->
             call.respond(
                 HttpStatusCode.BadRequest,
-                mapOf("error" to (cause.message ?: "Invalid country in request"))
+                mapOf("error" to (cause.message ?: "Invalid country in request")),
             )
         }
 

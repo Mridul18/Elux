@@ -20,12 +20,13 @@ class ProductRepository(private val database: Database) {
                 .map { row -> row.toProduct() }
         }
 
-    suspend fun findById(productId: String): Product? = newSuspendedTransaction(db = database) {
-        Products
-            .selectAll().where { Products.id.eq(productId) }
-            .singleOrNull()
-            ?.toProduct()
-    }
+    suspend fun findById(productId: String): Product? =
+        newSuspendedTransaction(db = database) {
+            Products
+                .selectAll().where { Products.id.eq(productId) }
+                .singleOrNull()
+                ?.toProduct()
+        }
 
     suspend fun save(product: Product): Product =
         newSuspendedTransaction(db = database) {
@@ -42,13 +43,14 @@ class ProductRepository(private val database: Database) {
         productId: String,
         discountId: String,
         percent: Double,
-    ): Boolean = newSuspendedTransaction(db = database) {
-        ProductDiscounts.insertIgnore {
-            it[ProductDiscounts.productId] = productId
-            it[ProductDiscounts.discountId] = discountId
-            it[ProductDiscounts.percent] = BigDecimal.valueOf(percent)
-        }.insertedCount > 0
-    }
+    ): Boolean =
+        newSuspendedTransaction(db = database) {
+            ProductDiscounts.insertIgnore {
+                it[ProductDiscounts.productId] = productId
+                it[ProductDiscounts.discountId] = discountId
+                it[ProductDiscounts.percent] = BigDecimal.valueOf(percent)
+            }.insertedCount > 0
+        }
 
     private fun ResultRow.toProduct(): Product {
         val productId = this[Products.id]

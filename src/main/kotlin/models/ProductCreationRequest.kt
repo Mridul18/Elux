@@ -29,7 +29,7 @@ data class ProductCreationRequest(
             name = name,
             basePrice = basePrice,
             country = country,
-            discounts = emptyList()
+            discounts = emptyList(),
         )
     }
 }
@@ -43,4 +43,3 @@ data class ProductResponse(
     val discounts: List<Discount>,
     val finalPrice: Double,
 )
-
